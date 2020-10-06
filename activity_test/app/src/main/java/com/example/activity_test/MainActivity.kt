@@ -14,18 +14,19 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.first_layout)
+        doSomething()
         button1.setOnClickListener {
-//            val data="Hello Secondary Activity"
+            val data="Hello Secondary Activity"
 //            val intent=Intent(this,SecondaryActivity::class.java)
 //            intent.putExtra("extra_data",data)
 //            startActivity(intent)
-
-            val intent1=Intent(this,SecondaryActivity::class.java)
-            startActivityForResult(intent1,1)
+            SecondaryActivity.actionStart(this,data)
+            //显示调用Intent
+//            val intent1=Intent(this,SecondaryActivity::class.java)
+//            startActivityForResult(intent1,1)
         }
 
-
-
+        ActivityCollector.addActivity(this)
         button2.setOnClickListener {
             val intent=Intent(Intent.ACTION_VIEW)
             intent.data=Uri.parse("https://www.baidu.com/")
@@ -48,7 +49,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
+    //创建右上角菜单
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.main,menu)
         return true
@@ -60,5 +61,11 @@ class MainActivity : AppCompatActivity() {
             R.id.remove_item->Toast.makeText(this,"REMOVE",Toast.LENGTH_SHORT).show()
         }
         return true
+    }
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        ActivityCollector.removeActivity(this)
     }
 }
