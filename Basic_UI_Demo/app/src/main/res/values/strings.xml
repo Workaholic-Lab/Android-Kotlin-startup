@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">UI_Demo</string>
+    <string name="textview">Display</string>
+    <string name="button1">left</string>
+    <string name="button2">right</string>
+    <string name="switch1">开关</string>
+    <string name="button3">确认</string>
+    <string name="editText">请输入数字</string>
+    <string name="radiobutton1">android</string>
+    <string name="radiobutton2">apple</string>
+    <string name="imageView1">image</string>
+    <string name="checkbox1">语文</string>
+    <string name="checkbox2">数学</string>
+    <string name="checkbox">英语</string>
+</resources>
