@@ -10,13 +10,14 @@ void markdown::getfile() {
 		}
 	}
 }
-//´¦ÀíÈÝÆ÷ÄÚÈÝ£¬¹¹½¨Óï·¨Ê÷
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï·¨ï¿½ï¿½
 void markdown::process() {
 	static bool ifstrong = false;
 	static bool ifitalic = false;
 	int headStart = 0;
 	root->child.push_back(new Node(nul));
-	for (int i = 0;i < infile.size();i++) {
+	int _size = infile.size();
+	for (int i = 0;i <_size;i++) {
 		headStart = 0;
 		ifitalic = false;
 		ifstrong = false;
@@ -41,8 +42,9 @@ void markdown::process() {
 	}
 int markdown::process_min(Node* &root,const int i, int& j, bool& ifitalic, bool& ifstrong) {
 	
-	for (;j < infile[i].length();j++) {
-		//Ð±Ìå
+	int len = infile[i].length();
+	for (;j < len;j++) {
+		//Ð±ï¿½ï¿½
 		if (infile[i][j] == '*' && (j + 1 < infile[i].length() && infile[i][j + 1] != '*' || j + 1 == infile[i].length())) {
 			if (!ifitalic) {
 				root->child.push_back(new Node(italic));
@@ -56,7 +58,7 @@ int markdown::process_min(Node* &root,const int i, int& j, bool& ifitalic, bool&
 			}
 			continue;
 		}
-		//ºÚÌå
+		//ï¿½ï¿½ï¿½ï¿½
 		else if (infile[i][j] == '*' && j + 1 < infile[i].length() && infile[i][j + 1] == '*') {
 			if (!ifstrong) {
 				root->child.push_back(new Node(stress));
@@ -75,7 +77,7 @@ int markdown::process_min(Node* &root,const int i, int& j, bool& ifitalic, bool&
 			root->child.push_back(new Node(para));
 			continue;
 		}
-		//ÆÕÍ¨ÎÄ±¾
+		//ï¿½ï¿½Í¨ï¿½Ä±ï¿½
 		else {
 			root->child.push_back(new Node(nul));
 			root->child.back()->cont += infile[i][j];
@@ -83,11 +85,11 @@ int markdown::process_min(Node* &root,const int i, int& j, bool& ifitalic, bool&
 	}
 }
 	
-//µÃµ½¸ù½Úµã
+//ï¿½Ãµï¿½ï¿½ï¿½ï¿½Úµï¿½
 Node* markdown:: getroot(){
 	return this->root;
 }
-//½«Óï·¨Ê÷ÄÚÈÝÐ´Èëcontent
+//ï¿½ï¿½ï¿½ï·¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½content
 void markdown::dfsContent(Node* root) {
 	content += frontTag[root->_type];
 	content += root->cont;
@@ -97,7 +99,7 @@ void markdown::dfsContent(Node* root) {
 	content += backTag[root->_type];
 }
 
-//½«contentÄÚÈÝÐ´³ÉhtmlÎÄ¼þ
+//ï¿½ï¿½contentï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½htmlï¿½Ä¼ï¿½
 void markdown::toHTML() {
 	ofstream fout("result.html");
 	string head="<!DOCTYPE html><html><head>\

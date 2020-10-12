@@ -1,10 +1,11 @@
 #include<iostream>
+#include<fstream>
+#include <string>
+#include <sstream>
 #include "markdown.h"
 using namespace std;
 int main() {
-	char input[10];
-	cin >> input;
-	markdown A(input);
+	markdown A("test.txt");
 	A.getfile();
 	A.process();
 	A.dfsContent(A.getroot());
