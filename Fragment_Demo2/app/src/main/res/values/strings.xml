@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Fragment_Demo2</string>
+    <string name="btn_replace">替换</string>
+    <string name="btn_remove">删除</string>
+</resources>

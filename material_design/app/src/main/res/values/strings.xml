@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">material_design</string>
+    <string name="label">你好世界</string>
+    <string name="textfield_label">Input</string>
+</resources>

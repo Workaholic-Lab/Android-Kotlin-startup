@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Fragment_Demo</string>
+    <string name="button1">Replace</string>
+</resources>
