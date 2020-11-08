@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">fragment_improvement</string>
+    <string name="rad_dialog_alter">Alter</string>
+    <string name="rad_dialog_date">Date</string>
+    <string name="rad_dialog_time">Time</string>
+    <string name="btn_create_dialog">创建一个新的dialog</string>
+</resources>
