@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -11,9 +12,18 @@ import android.widget.Toast
 import kotlinx.android.synthetic.main.first_layout.*
 
 class MainActivity : AppCompatActivity() {
+    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
+        super.onSaveInstanceState(outState, outPersistentState)
+        val tempData="Something you just typed"
+        outState.putString("data_key",tempData)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.first_layout)
+        if (savedInstanceState!=null){
+            val tempData=savedInstanceState.getString("data_key")
+            
+        }
         doSomething()
         button1.setOnClickListener {
             val data="Hello Secondary Activity"
