@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("MainActivity",javaClass.simpleName)//打印日志，知晓当前Activity
         setContentView(R.layout.first_layout)
         if (savedInstanceState!=null){
             val tempData=savedInstanceState.getString("data_key")
