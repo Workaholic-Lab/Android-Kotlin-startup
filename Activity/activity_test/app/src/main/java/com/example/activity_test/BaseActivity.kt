@@ -1,6 +1,7 @@
 package com.example.activity_test
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 
 /**

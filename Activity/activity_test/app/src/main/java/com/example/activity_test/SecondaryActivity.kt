@@ -16,7 +16,7 @@ class SecondaryActivity : BaseActivity() {
                 putExtra("extra_data",data1)
             }
 //            intent.putExtra("extra_data",data1)
-            context.startActivities(intent)
+            context.startActivity(intent)
         }
     }
 
