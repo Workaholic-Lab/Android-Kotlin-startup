@@ -18,7 +18,9 @@
 
 ## 常用控件
 
-### TextView
+## TextView
+
+
 
 > ```kotlin
 >  match_parent表示当前控件的大小和父布局的大小一样
@@ -300,3 +302,205 @@ button1.setOnClickListener {
 
 > 空间部分我们先讲解那么多，其他控件及其属性可以通过实践来自行摸索
 
+
+
+## 三种基本布局
+
+### LinearLayout
+
+> 线性布局是一种非常常见的布局，我们上面写的代码示例都是线性布局的
+
+* 我们可以摄影水平和垂直的方向
+
+```xml
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:orientation="vertical">
+```
+
+> 设置权重
+>
+> * 0dp代表不再有width的值来决定宽度
+>   * 效果就是左右各一个
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/ed1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:hint="Type Someting"
+        />
+    <Button
+        android:id="@+id/send"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Send"/>
+</LinearLayout>
+```
+
+> 更好的自适应效果：
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/ed1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:hint="Type Someting"
+        />
+    <Button
+        android:id="@+id/send"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send"/>
+</LinearLayout>
+```
+
+### RelativeLayout
+
+> 相对布局也是比较常用的一种布局，与LinearLayout不同的是，它相对显得较为**随意**
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/button1"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentTop="true"
+    />
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/button2"
+    android:layout_alignParentRight="true"
+    android:layout_alignParentTop="true"
+    />
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/button3"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentBottom="true"
+    />
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/button4"
+    android:layout_alignParentRight="true"
+    android:layout_alignParentBottom="true"
+    />
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/button5"
+    android:layout_centerInParent="true"
+    />
+</RelativeLayout>
+```
+
+![](E:\kotlin-study\Studying-Kotlin\UI_demo\relative.png)
+
+> 还可以相对于其他控件进行布局
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/button1"
+    android:layout_below="@+id/button5"
+    android:layout_toRightOf="@+id/button5"
+    />
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/button2"
+    android:layout_below="@+id/button5"
+    android:layout_toLeftOf="@+id/button5"
+    />
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/button3"
+    android:layout_above="@+id/button5"
+    android:layout_toRightOf="@+id/button5"
+    />
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/button4"
+    android:layout_above="@+id/button5"
+    android:layout_toLeftOf="@+id/button5"
+    />
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/button5"
+    android:layout_centerInParent="true"
+    />
+</RelativeLayout>
+```
+
+> 相对于中间那个Button来进行布局
+
+
+
+### FrameLayout
+
+> 帧布局，这种布局是非常非常简单的同时它的引用场景确实也比较少
+>
+> * 不过在后面的Fragment的介绍当中还会有用处的
+>   * 下面就是一左一右：
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+<TextView
+    android:id="@+id/tv1"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="left"
+    android:text="This is a TextView"
+    />
+    
+    <Button
+        android:id="@+id/bt1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:text="Button"/>
+</FrameLayout>
+```
+
+
+
+## 创建自定义的控件
+
+> 在系统控件不够用的时候，还可以创建自定义的控件
+>
+> 其实那些控件付清都是：TextView 或者 ImageView 或者 ViewGroup
+>
+> * 而他们的祖先都是View
+>   * **这里做一个类似于一起IOS风格的布局我就不做展示了，可以见书本P169的内容**
