@@ -14,7 +14,7 @@
 
 > 下面是我用constraintLayout来编写的一个小小Demo，**详见Basic_UI_Demo的项目**
 
-![](E:\kotlin-study\Studying-Kotlin\UI_demo\constraint.png)
+![](E:\kotlin-study\Studying-Kotlin\UI\UI_demo\constraint.png)
 
 ## 常用控件
 
@@ -298,7 +298,7 @@ button1.setOnClickListener {
         }
 ```
 
-![](E:\kotlin-study\Studying-Kotlin\UI_demo\dialog.png)
+![](E:\kotlin-study\Studying-Kotlin\UI\UI_demo\dialog.png)
 
 > 空间部分我们先讲解那么多，其他控件及其属性可以通过实践来自行摸索
 
@@ -417,7 +417,7 @@ button1.setOnClickListener {
 </RelativeLayout>
 ```
 
-![](E:\kotlin-study\Studying-Kotlin\UI_demo\relative.png)
+![](E:\kotlin-study\Studying-Kotlin\UI\UI_demo\relative.png)
 
 > 还可以相对于其他控件进行布局
 
@@ -617,9 +617,527 @@ activity.finish()
 
 
 
-## 最难的空间：ListView
+## 最难的控件：ListView
 
 > 数据滚动出屏幕
 >
 > * ex: QQ聊天记录， 翻看微博的信息.....
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/lv1"/>
+</LinearLayout>
+```
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private val data= listOf<String>("Apple","Banana","Pear","Watermelon","Grape","Pineapple","Strawberry","Cherry","Mango","Orange")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        val adapter=ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,data)
+        lv1.adapter=adapter
+    }
+}
+```
+
+> **下面这段代码就是关键**
+>
+> * 把Adapter构建好：```val adapter=ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,data)```
+> * 将适配好的Adapter对象传递给listView的
+
+```kotlin
+val adapter=ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,data)
+lv1.adapter=adapter
+```
+
+
+
+### 自定义ListView
+
+> 我们给单调的文字稍微加一点图片吧！！！
+
+* 定义一个实体类 Fruit 和fruit_item.xml
+
+```kotlin
+class Fruit(val name:String,val imageId:Int) {
+    
+}
+```
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="60dp">
+    
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="10dp"
+        android:id="@+id/fruitImage"
+        />
+    
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="10dp"
+        android:id="@+id/fruitName"/>
+
+</LinearLayout>
+```
+
+
+
+* 新建FruitAdapter
+
+  > ==这次Adapt是这个Fruit的对象了==
+  >
+  > * 自定义适配器！！！
+  > * 很重要哦
+
+  ```kotlin
+  class FruitAdapter(activity: Activity,val resourceId:Int, data:List<Fruit>): ArrayAdapter<Fruit>(activity,resourceId,data) {
+      override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+          val view =LayoutInflater.from(context).inflate(resourceId,parent,false)
+          val fruitImage:ImageView=view.findViewById(R.id.fruitImage)
+          val fruitName:TextView=view.findViewById(R.id.fruitName)
+          val fruit=getItem(position)//获取当前项的Fruit实例
+          fruit?.let { fruitImage.setImageResource(fruit.imageId)
+          fruitName.text=fruit.name}
+          return view
+      }
+  }
+  ```
+
+> 说明：
+>
+> * LayoutInflater的inflate()接受的三个参数，前面两个我们已经知道是怎么回事了:
+>   * 第一个参数是要加载的布局文件id
+>   * 第二个参数是加载好的布局再添加一个布局
+>   * **第三个参数false就是表示只让我们在父布局中声明的layout失效，==但不会为这个View添加父布局==**
+> * 这就是ListView**标准**的写法
+
+* 加入实例
+  * repeat函数，后面跟一个Lambda表达式：
+
+```kotlin
+repeat(2){
+    for (fn in data)
+    {
+        fruitList.add(Fruit(fn,R.drawable.ic_launcher_background))
+    }
+```
+
+```kotlin
+package com.workaholiclab.listviewtest
+
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.widget.ArrayAdapter
+import kotlinx.android.synthetic.main.activity_main.*
+
+class MainActivity : AppCompatActivity() {
+    private val fruitList=ArrayList<Fruit>()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        initFruits()
+        val adapter=FruitAdapter(this,R.layout.fruit_item,fruitList)
+        lv1.adapter=adapter
+//        val adapter=ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,data)
+//        lv1.adapter=adapter
+    }
+
+    private fun initFruits() {
+        val data= listOf<String>("Apple","Banana","Pear","Watermelon","Grape","Pineapple","Strawberry","Cherry","Mango","Orange")
+        repeat(2){
+            for (fn in data)
+            {
+                fruitList.add(Fruit(fn,R.drawable.ic_launcher_background))
+            }
+        }
+    }
+}
+```
+
+> 上面的关于listView的全部代码，可能有的部分需要自行做一些小小修改
+>
+> * 我这里没有这些水果的图片我随便放一张图片上去就算了
+
+### 提升ListView的效率
+
+> ListView之所以难用，因为它很多的细节都是可以优化的，运行效率就是其中的一个优化点
+>
+> * 效率低的原因是getView()方法中每次都要将布局重新加载一遍，当其快速滚动的时候，其性能就会成为瓶颈
+> * **我们使用convertView参数来进行缓存！！！**
+
+#### 重写getView()方法
+
+```kotlin
+class FruitAdapter(activity: Activity,val resourceId:Int, data:List<Fruit>): ArrayAdapter<Fruit>(activity,resourceId,data) {
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val view:View = convertView ?: LayoutInflater.from(context).inflate(resourceId,parent,false)
+        val fruitImage:ImageView=view.findViewById(R.id.fruitImage)
+        val fruitName:TextView=view.findViewById(R.id.fruitName)
+        val fruit=getItem(position)//获取当前项的Fruit实例
+        fruit?.let { fruitImage.setImageResource(fruit.imageId)
+        fruitName.text=fruit.name}
+        return view
+    }
+}
+```
+
+#### 继续优化
+
+> **现在每次在getView方法中仍然还是会调用View的findViewById的方法来获取一次控件的实例**
+>
+> * 现在我们借助一个ViewHolder来对这一部分进行优化
+> * 使用内部内inner class实现所有控件的缓存都放在ViewHolder中，没有必要每次findViewById()
+
+```kotlin
+class FruitAdapter(activity: Activity,val resourceId:Int, data:List<Fruit>): ArrayAdapter<Fruit>(activity,resourceId,data) {
+    inner class ViewHolder(val fruitImageView: ImageView,val fruitName: TextView)
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+            val viewHolder:ViewHolder
+            val view:View
+            if (convertView==null){
+                view=LayoutInflater.from(context).inflate(resourceId,parent,false)
+                val fruitImage:ImageView=view.findViewById(R.id.fruitImage)
+                val fruitName:TextView=view.findViewById(R.id.fruitName)
+                viewHolder=ViewHolder(fruitImage,fruitName)
+                view.tag=viewHolder
+            }else{
+                view=convertView
+                viewHolder=view.tag as ViewHolder
+            }
+            val fruit=getItem(position)//获取当前项的Fruit实例
+            fruit?.let {
+                viewHolder.fruitImageView.setImageResource(fruit.imageId)
+                viewHolder.fruitName.text=fruit.name
+            }
+            return view
+        }
+
+}
+```
+
+> 经过上述两步的优化后，性能已经非常不错了
+
+#### ListView的点击事件
+
+> 为ListView注册一个监听器即可
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private val fruitList=ArrayList<Fruit>()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        initFruits()
+        val adapter=FruitAdapter(this,R.layout.fruit_item,fruitList)
+        lv1.adapter=adapter
+        lv1.setOnItemClickListener { parent, view, position, id ->
+            val fruit=fruitList[position]
+            Toast.makeText(this,fruit.name,Toast.LENGTH_SHORT).show()
+        }
+//        val adapter=ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,data)
+//        lv1.adapter=adapter
+    }
+    private fun initFruits() {
+        val data= listOf<String>("Apple","Banana","Pear","Watermelon","Grape","Pineapple","Strawberry","Cherry","Mango","Orange")
+        repeat(2){
+            for (fn in data)
+            {
+                fruitList.add(Fruit(fn,R.drawable.ic_launcher_background))
+            }
+        }
+    }
+}
+```
+
+> 没有用到的参数Kotlin还允许用下划线_代替
+
+```kotlin
+lv1.setOnItemClickListener { _, _, position, _ ->
+    val fruit=fruitList[position]
+    Toast.makeText(this,fruit.name,Toast.LENGTH_SHORT).show()
+}
+```
+
+
+
+## RecyclerView
+
+> 更加强大的滚动组件
+>
+> * 他是一个增强版本的ListView，未来的更多程序会从ListView转向RecyclerView
+
+### 基本用法
+
+```gradle
+implementation 'androidx.recyclerview:recyclerview:1.0.0'
+```
+
+> 具体到最新版本可以自行查找
+
+> 下面是RecyclerView适配器的标准写法
+
+```kotlin
+class FruitAdapter(val fruitList:List<Fruit>):RecyclerView.Adapter<FruitAdapter.ViewHolder>() {
+    inner class ViewHolder(view: View):RecyclerView.ViewHolder(view){
+        val fruitImage: ImageView =view.findViewById(R.id.fruitImage)
+        val fruitName: TextView=view.findViewById(R.id.fruitName)
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view=LayoutInflater.from(parent.context).inflate(R.layout.fruit_item,parent,false)
+        return ViewHolder(view)
+    }
+
+    override fun getItemCount(): Int {
+        return fruitList.size
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val fruit=fruitList[position]
+        holder.fruitImage.setImageResource(fruit.imageId)
+        holder.fruitName.text=fruit.name
+    }
+}
+```
+
+> 上面这个RecyclerView适配器的写法看起来好复杂，里面的方法很多，但其实比ListView更加简洁
+>
+> * 首先我们定义一个内部内ViewHolder，它继承自RecyclerView.ViewHolder
+> * 然后ViewHoder的主构造函数中要传入一个View的参数
+>   * 这个参数是RecyclerView子项的最外层布局
+>   * 可以通过findViewById的方法获取布局中的IamgeView和TextView实例
+> * FruitAdapter中有一个主构造函数，```FruitAdapter(val fruitList:List<Fruit>)```他用于把展示的数据传进来，方便我们后续操作
+> * 重写父类```RecyclerView.Adapter<FruitAdapter.ViewHolder>```的三个方法：
+>   * onCreateViewHolder()创建一个ViewHolder实例，**并把加载出来的布局传到构造函数里面**，最后将ViewHolder的实例返回
+>   * onBindViewHolder()方法用于对RecyclerView子项的数据进行赋值，会在每个子项被滚动到屏幕内的时候执行，这里我们通过position参数得到当前项的Fruit实例，然后再设置到ViewHolder中
+>   * getItemCount方法就是返回多少个子项就好了
+
+适配器准备好之后，我们使用RecyclerView如下：
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private val fruitList=ArrayList<Fruit>()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        initFruits()
+        val layoutManager=LinearLayoutManager(this)
+        rv1.layoutManager=layoutManager
+        val adapter=FruitAdapter(fruitList)
+        rv1.adapter=adapter
+    }
+    private fun initFruits() {
+        val data= listOf<String>("Apple","Banana","Pear","Watermelon","Grape","Pineapple","Strawberry","Cherry","Mango","Orange")
+        repeat(2){
+            for (fn in data)
+            {
+                fruitList.add(Fruit(fn,R.drawable.ic_launcher_background))
+            }
+        }
+    }
+}
+```
+
+> * 先创建LinearLayoutManager对象，并把它设置到RecyclerView
+> * LayoutManager指定RecyclerView的布局方式
+> * 最后调用RecyclerView的setAdapter方法来完成调用即可
+
+### 实现横向布局与瀑布布局
+
+> 要想实现横向滚动的话就修改一下fruit_item.xml的代码
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="80dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:id="@+id/fruitImage"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:id="@+id/fruitName"/>
+
+</LinearLayout>
+```
+
+
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private val fruitList=ArrayList<Fruit>()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        initFruits()
+        val layoutManager=LinearLayoutManager(this)
+        rv1.layoutManager=layoutManager
+        layoutManager.orientation=LinearLayoutManager.HORIZONTAL
+        val adapter=FruitAdapter(fruitList)
+        rv1.adapter=adapter
+    }
+    private fun initFruits() {
+        val data= listOf<String>("Apple","Banana","Pear","Watermelon","Grape","Pineapple","Strawberry","Cherry","Mango","Orange")
+        repeat(2){
+            for (fn in data)
+            {
+                fruitList.add(Fruit(fn,R.drawable.ic_launcher_background))
+            }
+        }
+    }
+}
+```
+
+> **加多了一行```layoutManager.orientation=LinearLayoutManager.HORIZONTAL```即可，默认是纵向的！**
+
+> LayoutManager就是RecyclerView的最大优势所在
+>
+> * 制定了一套可扩展的布局排列接口，子类只要按照接口的规范来实现，就能定制出不同的排列布局了
+
+> 下面我们来看看瀑布布局
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp"
+    android:orientation="vertical">
+
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:id="@+id/fruitImage"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:layout_marginTop="10dp"
+        android:id="@+id/fruitName"/>
+
+</LinearLayout>
+```
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private val fruitList=ArrayList<Fruit>()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        initFruits()
+        val layoutManager=StaggeredGridLayoutManager(3,StaggeredGridLayoutManager.VERTICAL)
+        rv1.layoutManager=layoutManager
+        val adapter=FruitAdapter(fruitList)
+        rv1.adapter=adapter
+    }
+    private fun initFruits() {
+        val data= listOf<String>("Apple","Banana","Pear","Watermelon","Grape","Pineapple","Strawberry","Cherry","Mango","Orange")
+        repeat(2){
+            for (fn in data)
+            {
+                fruitList.add(Fruit(getRandomLengthString(fn),R.drawable.ic_launcher_background))
+            }
+        }
+    }
+
+    private fun getRandomLengthString(str: String): String {
+        val n=(1..20).random()
+        val builder=StringBuilder()
+        repeat(n){
+            builder.append(str)
+        }
+        return builder.toString()
+    }
+}
+```
+
+
+
+> 核心代码如下：
+
+```kotlin
+        val layoutManager=StaggeredGridLayoutManager(3,StaggeredGridLayoutManager.VERTICAL)
+        rv1.layoutManager=layoutManager
+        val adapter=FruitAdapter(fruitList)
+        rv1.adapter=adapter
+```
+
+> 效果图：
+
+
+
+![](E:\kotlin-study\Studying-Kotlin\UI\瀑布布局.png)
+
+
+
+### 点击事件
+
+> 这一点和ListView相比，比较特殊，它没有方法实现，**需要在自己给子项具体的View去注册点击事件**
+>
+> * 这里相对于ListView来说确实要复杂一些
+
+**修改FruitAdapter中==onCreateViewHolder==的代码**
+
+```kotlin
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view=LayoutInflater.from(parent.context).inflate(R.layout.fruit_item,parent,false)
+        val viewHolder=ViewHolder(view)
+        viewHolder.itemView.setOnClickListener{
+            val position=viewHolder.adapterPosition
+            val fruit=fruitList[position]
+            Toast.makeText(parent.context,"you clicked view ${fruit.name}",Toast.LENGTH_SHORT).show()
+        }
+        viewHolder.fruitImage.setOnClickListener{
+            val position=viewHolder.adapterPosition
+            val fruit=fruitList[position]
+            Toast.makeText(parent.context,"you clicked view ${fruit.name}",Toast.LENGTH_SHORT).show()
+        }
+        return viewHolder
+    }
+```
+
+> 注意最够返回的，这里比较麻烦的是图片和文字都要响应这个点击事件
+
+
+
+## 编写界面的最佳实践
+
+> ==这一部分主要内容自己看书本P193页开始吧==
+
+
 
