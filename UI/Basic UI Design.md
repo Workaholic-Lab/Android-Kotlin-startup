@@ -1138,6 +1138,274 @@ class MainActivity : AppCompatActivity() {
 ## 编写界面的最佳实践
 
 > ==这一部分主要内容自己看书本P193页开始吧==
+>
+> * 这里我们也来讲解一下
+> * 编写一个精美的聊天界面
+
+### 制作9-Patch图片
+
+> **这是一种经过特殊处理的png图片，能够制定那个区域被拉伸，哪些区域不可以被拉伸**
+
+*在对应的资源图片右击学Create 9-Patch file即可*
+
+* 黑色部分表示可以拉伸
+* 按住Shift+鼠标可以擦除
+* ==最后记得把原来那张图片删除就好了==
+  * 因为android是不允许有两张的，即使后缀名不同也不可以
+
+![](E:\kotlin-study\Studying-Kotlin\UI\9patch.png)
 
 
 
+
+
+修改activity_main.xml代码：
+
+```xml
+android:background="#d8e0e8"
+```
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#d8e0e8" >
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <EditText
+            android:id="@+id/inputText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Type something here"
+            android:maxLines="2" />
+
+        <Button
+            android:id="@+id/send"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Send" />
+
+    </LinearLayout>
+
+</LinearLayout>
+```
+
+
+
+### 利用RecyclerView来制作
+
+> 具体导入这里就不再做过多的阐述了
+
+* 新建Msg实体类
+
+  ```kotlin
+  class Msg(val content: String, val type: Int) {
+      companion object {
+          const val TYPE_RECEIVED = 0 
+          const val TYPE_SENT = 1
+      }
+  }
+  ```
+
+  > 只有在单例类，顶层方法，companion object中才可以使用const关键字
+
+  **接下来开始写RecyclerView的子布局了**
+
+  > 左右各一个
+
+  ```xml
+  <?xml version="1.0" encoding="utf-8"?>
+  <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+      android:orientation="vertical"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:padding="10dp" >
+  
+      <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="left"
+          android:background="@drawable/message_left" >
+  
+          <TextView
+              android:id="@+id/leftMsg"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_gravity="center"
+              android:layout_margin="10dp"
+              android:textColor="#fff" />
+  
+      </LinearLayout>
+  
+  </FrameLayout>
+  ```
+
+  
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp" >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:background="@drawable/message_right" >
+
+        <TextView
+            android:id="@+id/rightMsg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:textColor="#000" />
+
+    </LinearLayout>
+
+
+</FrameLayout>
+```
+
+**Adapter的代码也是差不多：**
+
+```kotlin
+package com.example.uibestpractice
+
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
+
+
+class MsgAdapter(val msgList: List<Msg>) : RecyclerView.Adapter<MsgViewHolder>() {
+
+    override fun getItemViewType(position: Int): Int {
+        val msg = msgList[position]
+        return msg.type
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = if (viewType == Msg.TYPE_RECEIVED) {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.msg_left_item, parent, false)
+        LeftViewHolder(view)
+    } else {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.msg_right_item, parent, false)
+        RightViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: MsgViewHolder, position: Int) {
+        val msg = msgList[position]
+        when (holder) {
+            is LeftViewHolder -> holder.leftMsg.text = msg.content
+            is RightViewHolder -> holder.rightMsg.text = msg.content
+         }
+    }
+
+    override fun getItemCount() = msgList.size
+
+}
+```
+
+**上面的代码我们根据不同的ViewType创建不同的界面**
+
+我们使用封闭类来实现：
+
+```kotlin
+sealed class MsgViewHolder(view: View) : RecyclerView.ViewHolder(view)
+
+class LeftViewHolder(view: View) : MsgViewHolder(view) {
+    val leftMsg: TextView = view.findViewById(R.id.leftMsg)
+}
+
+class RightViewHolder(view: View) : MsgViewHolder(view) {
+    val rightMsg: TextView = view.findViewById(R.id.rightMsg)
+}
+```
+
+* 发送点击事件就很简单了
+
+```kotlin
+class MainActivity : AppCompatActivity(), View.OnClickListener {
+
+    private val msgList = ArrayList<Msg>()
+
+    private lateinit var adapter: MsgAdapter
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        initMsg()
+        val layoutManager = LinearLayoutManager(this)
+        recyclerView.layoutManager = layoutManager
+        if (!::adapter.isInitialized) {
+            adapter = MsgAdapter(msgList)
+        }
+        recyclerView.adapter = adapter
+        send.setOnClickListener(this)
+    }
+
+    override fun onClick(v: View?) {
+        when (v) {
+            send -> {
+                val content = inputText.text.toString()
+                if (content.isNotEmpty()) {
+                    val msg = Msg(content, Msg.TYPE_SENT)
+                    msgList.add(msg)
+                    adapter.notifyItemInserted(msgList.size - 1) // 当有新消息时，刷新RecyclerView中的显示
+                    recyclerView.scrollToPosition(msgList.size - 1)  // 将 RecyclerView定位到最后一行
+                    inputText.setText("") // 清空输入框中的内容
+                }
+            }
+        }
+    }
+
+    private fun initMsg() {
+        val msg1 = Msg("Hello guy.", Msg.TYPE_RECEIVED)
+        msgList.add(msg1)
+        val msg2 = Msg("Hello. Who is that?", Msg.TYPE_SENT)
+        msgList.add(msg2)
+        val msg3 = Msg("This is Tom. Nice talking to you. ", Msg.TYPE_RECEIVED)
+        msgList.add(msg3)
+    }
+}
+```
+
+> 这里你喜欢用另外一种风格的来写也是可以的
+
+效果如下：
+
+![](E:\kotlin-study\Studying-Kotlin\UI\bestpractice.png)
+
+
+
+* 再补充一个封闭内
+
+```kotlin
+sealed class Result
+
+class Success(val msg: String) : Result()
+
+class Failure(val error: Exception) : Result()
+
+
+fun getResultMsg(result: Result) = when (result) {
+    is Success -> result.msg
+    is Failure -> "Error is ${result.error.message}"
+}
+```
+
+> UI基础设计部分正式完工
