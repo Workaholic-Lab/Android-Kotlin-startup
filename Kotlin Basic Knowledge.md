@@ -414,3 +414,149 @@ class MsgAdapter(val msgList: List<Msg>) : RecyclerView.Adapter<MsgViewHolder>()
 holder: MsgViewHolder
 ```
 
+
+
+# 扩展函数
+
+> 不少高级语言都有扩展函数的功能，但Java并没有
+>
+> * 令人兴奋的是，Kotlin对扩展函数则有着很好的支持
+
+> Example:统计一个字符串当中字母的数量
+
+我们会自然地写出：
+
+```kotlin
+object StringUtil{
+    fun lettersCount(str:String):Int{
+        var count=0
+        for(char in str){
+            if(char.isLetter())
+                count++
+        }
+        return count
+    }
+}
+```
+
+
+
+**上面这种写法固然是正确的，但有了扩展函数，我们可以用面向对象的思维来实现这个功能**
+
+* 首先来看一下扩展函数的定义先
+
+```kotlin
+fun ClassName.methodName(p1:Int,p2:Int):Int{
+    return 0
+}
+```
+
+```kotlin
+fun String.lettersCount():Int{
+    var count=0
+    for(char in this){
+        if(char.isLetter())
+            count++
+    }
+    return count
+}
+```
+
+**这里我们把lettersCount函数定义为String类的扩展函数，那么函数就拥有了String实例的上下文**
+
+* 这个this就代表了字符串本身
+
+* 调用
+
+```kotlin
+val count="ABDJ1234989!@)))".lettersCount()
+```
+
+# 运算符重载
+
+> 这里的定义和C++中的很类似，就不再过多阐述
+
+
+
+> 我这里就简单的实现几个小实例
+
+```kotlin
+class Obj {
+    operator fun plus(obj:Obj):Obj{
+        //处理相加的逻辑代码
+    }
+}
+
+
+val obj1=Obj()
+val obj2=Obj()
+val obj3= obj1+ obj2
+```
+
+**这里plus就代表了+，对应-就是minus**
+
+
+
+==**这里调用函数的对照表如下：**==
+
+| 表达式 | 对应的函数     | 说明   |
+| ------ | -------------- | ------ |
+| +a     | a.unaryPlus()  |        |
+| -a     | a.unaryMinus() | 取反   |
+| !a     | a.not()        | 非运算 |
+
+| a++  | a.inc() | 自增 |
+| ---- | ------- | ---- |
+| a–   | a.dec() | 自减 |
+
+| a + b | a.plus(b)                 | 加           |
+| ----- | ------------------------- | ------------ |
+| a - b | a.minus(b)                | 减           |
+| a * b | a.times(b)                | 乘           |
+| a / b | a.div(b)                  | 除           |
+| a % b | a.rem(b), a.mod(b) (弃用) | 取模         |
+| a..b  | a.rangeTo(b)              | 从a到b的区间 |
+
+| a in b  | b.contains(a)  | b包含a   |
+| ------- | -------------- | -------- |
+| a !in b | !b.contains(a) | b不包含a |
+
+| a[i]               | a.get(i)              | 获取位置i的值              |
+| ------------------ | --------------------- | -------------------------- |
+| a[i, j]            | a.get(i, j)           | 获取位置 i 和 j 的值       |
+| a[i_1, …, i_n]     | a.get(i_1, …, i_n)    | 获取 i_1到i_n的值          |
+| a[i] = b           | a.set(i, b)           | 将位置 i 的值设置为 b      |
+| a[i, j] = b        | a.set(i, j, b)        | 将位置 i 和 j 的值设置为 b |
+| a[i_1, …, i_n] = b | a.set(i_1, …, i_n, b) | 将 i_1到i_n 的值设为b      |
+
+| a()            | a.invoke()            | 无参调用         |
+| -------------- | --------------------- | ---------------- |
+| a(i)           | a.invoke(i)           | 带一个参数的调用 |
+| a(i, j)        | a.invoke(i, j)        | 带两个参数的调用 |
+| a(i_1, …, i_n) | a.invoke(i_1, …, i_n) | 带n个参数的调用  |
+
+| a += b | a.plusAssign(b)                       |      |
+| ------ | ------------------------------------- | ---- |
+| a -= b | a.minusAssign(b)                      |      |
+| a *= b | a.timesAssign(b)                      |      |
+| a /= b | a.divAssign(b)                        |      |
+| a %= b | a.remAssign(b), a.modAssign(b) (弃用) |      |
+
+| a == b | a?.equals(b) ?: (b === null)    |      |
+| ------ | ------------------------------- | ---- |
+| a != b | !(a?.equals(b) ?: (b === null)) |      |
+
+| a > b  | a.compareTo(b) > 0  | a大于b     |
+| ------ | ------------------- | ---------- |
+| a < b  | a.compareTo(b) < 0  | a 小于b    |
+| a >= b | a.compareTo(b) >= 0 | a大于等于b |
+| a <= b | a.compareTo(b) <= 0 | a小于等于b |
+
+> 示例：
+
+```kotlin
+operator fun String.times(n:Int)=repeat(n)
+//实现上面的重载后即可
+fun getRandomLengthString(str:String)=str*(1..20).random()
+```
+
