@@ -364,3 +364,464 @@ if(activity!=null){
 
 
 
+### 使用限定符
+
+> 在平板上，很多界面都是采取双页模式，像wechat的平板端一样，而手机的屏幕只有一个页面。
+>
+> 如何让程序对双页单页进行判断呢，这里就要采用限定符了
+
+* 先只保留右侧的fragment
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+    
+    <fragment
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="com.workaholiclab.useoffragment.RightFragment"
+        android:id="@+id/rightFrag"/>
+
+</LinearLayout>
+```
+
+* 接着在新建layout-large文件夹新建一个两个fragment的布局,同样创建同名的activity_main.xml
+
+  ```xml
+  <?xml version="1.0" encoding="utf-8"?>
+  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      tools:context=".MainActivity">
+  
+      <fragment
+          android:layout_width="0dp"
+          android:layout_weight="1"
+          android:layout_height="match_parent"
+          android:name="com.workaholiclab.useoffragment.LeftFragment"
+          android:id="@+id/leftFrag"/>
+      <fragment
+          android:layout_width="0dp"
+          android:layout_weight="3"
+          android:layout_height="match_parent"
+          android:name="com.workaholiclab.useoffragment.RightFragment"
+          android:id="@+id/rightFrag"/>
+  
+  </LinearLayout>
+  ```
+
+  
+
+> 这样子就大功告成了
+
+下面看看Android的一些常用的限定符：
+
+  ![](E:\kotlin-study\Studying-Kotlin\Fragment\限定符.jpg)
+
+
+
+### 使用宽度最小限定符
+
+> 上面的large到底指多大呢？
+>
+> 有时候我们希望更加灵活地为不同设备加载布局，不管他是不是被认定为large
+
+
+
+**这时我们要是用最小宽度限定符**
+
+* 允许我们对屏幕的宽度制定一个最小值，然后以这个最小值为灵界点加载布局
+
+res目录下新建layout-sw600dp文件夹，同样创建activity_main.xml
+
+> 意味着我们以600dp为一个最小宽度分界，**==大于==**这个值则会加载下面这个布局
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <fragment
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:name="com.workaholiclab.useoffragment.LeftFragment"
+        android:id="@+id/leftFrag"/>
+    <fragment
+        android:layout_width="0dp"
+        android:layout_weight="3"
+        android:layout_height="match_parent"
+        android:name="com.workaholiclab.useoffragment.RightFragment"
+        android:id="@+id/rightFrag"/>
+
+</LinearLayout>
+```
+
+
+
+## Fragment最佳实践
+
+> 这里我们以编写一个简易版本的新闻应用为例
+
+* 分隔开的细线是通过View来实现的
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/contentLayout"
+    android:orientation="vertical"
+    android:visibility="invisible"
+    >
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="10dp"
+        android:textSize="20sp"
+        android:id="@+id/newsTitle"
+        />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#000"
+        />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="15dp"
+        android:textSize="18sp"
+        android:id="@+id/newsContent"/>
+</LinearLayout>
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:background="#000"
+</RelativeLayout>
+```
+
+> 我们设定成invisible表示单页模式下不点开来是不会显示出来的
+
+```kotlin
+class NewsContentActivity : AppCompatActivity() {
+    companion object{
+        fun actionStart(context: Context,title:String,content:String){
+            val intent=Intent(context,NewsContentActivity::class.java).apply {
+                putExtra("news_title",title)
+                putExtra("news_content",content)
+            }
+            context.startActivity(intent)
+        }
+    }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_news_content)
+        val title=intent.getStringExtra("news_title")
+        val content=intent.getStringExtra("news_content")
+        if (title!=null&&content!=null)
+        {
+            val fragment=newsContentFrag as NewsContentFragment
+            fragment.refresh(title,content)//刷新NewsContentFragment界面
+        }
+    }
+}
+```
+
+```kotlin
+class NewsContentFragment:Fragment() {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        inflater.inflate(R.layout.news_content_frag,container,false)
+    }
+    
+    fun refresh(title:String,content:String)
+    {
+        contentLayout.visibility=View.VISIBLE
+        //刷新内容
+        newsContent.text=content
+        newsTitle.text=title
+    }
+}
+```
+
+**如果想在单页模式下使用：**
+
+* activity_news_content.xml（新建）
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<fragment
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/newsContentFrag"
+    android:name="com.workaholiclab.bestparcticefragment.NewsContentFragment"/>
+</LinearLayout>
+```
+
+这里我们充分发挥了代码的复用性，直接在布局当中引入NewsContentFragment
+
+
+
+> 接下开我们还需要一个显示新闻列表的布局
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<androidx.recyclerview.widget.RecyclerView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/newsTitleRecyclerView"/>
+</LinearLayout>
+```
+
+它的子布局：
+
+```android:ellipsize="end"```用于设定当前文本内容超出控件宽度时候文本的缩略方式，这里指尾部缩略
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/newsTitle" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:maxLines="1"
+    android:ellipsize="end"
+    android:textSize="18sp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingBottom="10dp"
+    android:paddingTop="10dp"
+    />
+
+```
+
+新建Fragment:
+
+```kotlin
+class NewsTitleFragment:Fragment(){
+    private var isTwopane=false
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.news_title_frag,container,false)
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        isTwopane=activity?.findViewById<View>(R.id.newsContentLayout)!=null
+    }
+}
+```
+
+* 这里我们通过onActivityCreted方法在Activity中能否找到对饮id的View，来判断当前是单页还是双页
+
+activity_main.xml：
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/newsTitleLayout"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+<fragment
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:name="com.workaholiclab.bestparcticefragment.NewsTitleFragment"
+    android:id="@+id/newsTitleFrag"/>
+
+</FrameLayout>
+```
+
+同样新建一个sw600dp的activity_main.xml
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<fragment
+    android:layout_width="0dp"
+    android:layout_height="match_parent"
+    android:layout_weight="1"
+    android:name="com.workaholiclab.bestparcticefragment.NewsTitleFragment"
+    android:id="@+id/newsTitleFrag"/>
+    <FrameLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="3"
+        android:id="@+id/newsContentLayout">
+        <fragment
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/newsContentFrag"
+            android:name="com.workaholiclab.bestparcticefragment.NewsContentFragment"/>
+    </FrameLayout>
+</LinearLayout>
+```
+
+> 注意：id是可以一样的
+
+> 在往下做的过程中建议想清楚上面的步骤先
+
+* 接下来我们就是做Adapter了
+
+  > **==这理我们在NewsTitleFragment中新建一个内部内Adapter来适配==**
+
+  ```kotlin
+  class NewsTitleFragment:Fragment(){
+      private var isTwopane=false
+      override fun onCreateView(
+          inflater: LayoutInflater,
+          container: ViewGroup?,
+          savedInstanceState: Bundle?
+      ): View? {
+          return inflater.inflate(R.layout.news_title_frag,container,false)
+      }
+  
+      override fun onActivityCreated(savedInstanceState: Bundle?) {
+          super.onActivityCreated(savedInstanceState)
+          isTwopane=activity?.findViewById<View>(R.id.newsContentLayout)!=null
+      }
+      
+      inner class NewsAdapter(val newsList: List<News>):RecyclerView.Adapter<NewsAdapter.ViewHolder>(){
+          inner class ViewHolder(view:View):RecyclerView.ViewHolder(view){
+              val newsTitle:TextView=view.findViewById(R.id.newsTitle)
+          }
+  
+          override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+              val view=LayoutInflater.from(parent.context).inflate(R.layout.news_item,parent,false)
+              val holder=ViewHolder(view)
+              holder.itemView.setOnClickListener{
+                  val news=newsList[holder.adapterPosition]
+                  if (isTwopane)
+                  {
+                      val fragment=newsContentFrag as NewsContentFragment
+                      fragment.refresh(news.title,news.content)
+                  }
+                  else{
+                      NewsContentActivity.actionStart(parent.context,news.title,news.content)
+                  }
+              }
+              return holder
+          }
+  
+          override fun getItemCount(): Int {
+              return newsList.size
+          }
+  
+          override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+              val news=newsList[position]
+              holder.newsTitle.text=news.title
+          }
+      }
+  }
+  ```
+
+  > 这里写成内部类的好处是可以直接访问NewsTitleFragment中的变量，如isTwoPane
+
+* 收尾工作，像RecyclerView中填充数据
+
+```kotlin
+class NewsTitleFragment:Fragment(){
+    private var isTwopane=false
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.news_title_frag,container,false)
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        isTwopane=activity?.findViewById<View>(R.id.newsContentLayout)!=null
+        val layoutManager=LinearLayoutManager(activity)
+        newsTitleRecyclerView.layoutManager=layoutManager
+        val adapter=NewsAdapter(getNews())
+        newsTitleRecyclerView.adapter=adapter
+    }
+
+    private fun getNews(): List<News> {
+        val newsList=ArrayList<News>()
+        for(i in 1..50){
+            val news=News("This is news title $i",getRandomLengthString("This is news content $i."))
+            newsList.add(news)
+        }
+    }
+
+    private fun getRandomLengthString(str: String): String {
+        val n=(1..20).random()
+        val builder=StringBuilder()
+        repeat(n){
+            builder.append(str)
+        }
+        return builder.toString()
+    }
+
+    inner class NewsAdapter(val newsList: List<News>):RecyclerView.Adapter<NewsAdapter.ViewHolder>(){
+        inner class ViewHolder(view:View):RecyclerView.ViewHolder(view){
+            val newsTitle:TextView=view.findViewById(R.id.newsTitle)
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val view=LayoutInflater.from(parent.context).inflate(R.layout.news_item,parent,false)
+            val holder=ViewHolder(view)
+            holder.itemView.setOnClickListener{
+                val news=newsList[holder.adapterPosition]
+                if (isTwopane)
+                {
+                    val fragment=newsContentFrag as NewsContentFragment
+                    fragment.refresh(news.title,news.content)
+                }
+                else{
+                    NewsContentActivity.actionStart(parent.context,news.title,news.content)
+                }
+            }
+            return holder
+        }
+
+        override fun getItemCount(): Int {
+            return newsList.size
+        }
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val news=newsList[position]
+            holder.newsTitle.text=news.title
+        }
+    }
+}
+```
+
+
+
+> Fragment博客完工
