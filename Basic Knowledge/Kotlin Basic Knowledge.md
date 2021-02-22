@@ -560,3 +560,133 @@ operator fun String.times(n:Int)=repeat(n)
 fun getRandomLengthString(str:String)=str*(1..20).random()
 ```
 
+
+
+# 高阶函数
+
+## 定义高阶函数
+
+> 高阶函数和Lambda表达式是密不可分的
+
+**定义：如果一个函数接收另一个函数作为参数，或者返回值的类型是另一个函数，那么该函数就是高阶函数**
+
+
+
+* 基本语法：
+
+  ```kotlin
+  (String,Int)->Unit
+  ```
+
+  > * ->左边是声明该函数接收什么参数的
+  >   * 如果不接收任何参数，写一对空括号就好了
+  > * ->的右边用于晟敏返回类型，Unit就相当于Java中的void
+
+  ```kotlin
+  fun num1AndNum2(num1:Int,num2:Int,operation:(Int,Int)->Int):Int{
+      return operation(num1,num2)
+  }
+  
+  
+  fun plus(num1:Int,num2:Int):Int{
+      return num1+num2
+  }
+  
+  fun minus(num1:Int,num2: Int):Int{
+      return num1-num2
+  }
+  
+  fun main(){
+      val num1=80
+      val num2=50
+      val r1= num1AndNum2(num1,num2,::plus)
+      val r2= num1AndNum2(num1,num2,::minus)
+      println("r1 is $r1")
+      println("r2 is $r2")
+  
+  }
+  ```
+
+  > 下面用Lambda表达式改进一下：
+
+  ```kotlin
+  fun main(){
+      val num1=80
+      val num2=50
+      val r1= num1AndNum2(num1,num2){n1,n2->n1+n2}
+      val r2= num1AndNum2(num1,num2){n1,n2->n1-n2}
+      println("r1 is $r1")
+      println("r2 is $r2")
+  }
+  ```
+
+  
+
+> 下面我们用我们自己创建的build函数代替之前的apply
+
+```kotlin
+fun StringBuilder.build(block:StringBuilder.()->Unit):StringBuilder{
+    block()
+    return this
+}
+```
+
+你会看到这里加了个StringBuilder.是什么鬼，其实这才是完整的语法格式，加上ClassName表示这个·函数类型定义在哪个类中
+
+
+
+```kotlin
+fun main(){
+    val list= listOf("Apple","Banana","Orange","Pear","Grape")
+    val result=StringBuilder().build {
+        append("Start eating fruits")
+        for(fruit in list)
+        {
+            append(fruit).append("\n")
+        }
+        append("Ate all fruits")
+    }
+    println(result.toString())
+}
+```
+
+
+
+## 内联函数
+
+> 内联函数的机制可以将使用Lambda表达式带来的运行是开销完全解除
+
+**加上fun前面inline关键字即可**
+
+```kotlin
+inline fun num1AndNum2(num1:Int,num2:Int,operation:(Int,Int)->Int):Int{
+    return operation(num1,num2)
+}
+```
+
+
+
+> 下面考虑一下特殊的情况：
+
+![1](E:\kotlin-study\Studying-Kotlin\Basic Knowledge\1.jpg)
+
+
+
+
+
+
+
+![2](E:\kotlin-study\Studying-Kotlin\Basic Knowledge\2.jpg)
+
+
+
+
+
+
+
+![3](E:\kotlin-study\Studying-Kotlin\Basic Knowledge\3.jpg)
+
+
+
+![4](E:\kotlin-study\Studying-Kotlin\Basic Knowledge\4.jpg)
+
