@@ -271,5 +271,11 @@ class MyBroadcastReceiver : BroadcastReceiver() {
 
 > 这个在生活中中的例子很多，像QQ等应用都会有强制下线的功能
 
+> 这个实现比较简单，不再过多阐述，详细代码见我github仓库中的ForceOffline文件
+
+
+
+> 广播机制完更
+
 
 
