@@ -185,5 +185,91 @@ MainActivity中测试:
 
 
 
-## 发送有序广播
+### 发送有序广播
+
+> 我们同股哟AnotherBroadcastReceiver来演示一下
+>
+> * 操作和上面的步骤类似
+
+```kotlin
+class AnotherBroadcastReceiver : BroadcastReceiver() {
+
+    override fun onReceive(context: Context, intent: Intent) {
+        // This method is called when the BroadcastReceiver is receiving an Intent broadcast.
+        Toast.makeText(context,"received in AnotherBroadcastReceiver",Toast.LENGTH_SHORT).show()
+    }
+}
+```
+
+```xml
+<receiver
+            android:name=".AnotherBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.workaholiclab.receivertest.MY_BROADCAST"/>
+            </intent-filter>
+        </receiver>
+```
+
+
+
+```kotlin
+    bt1.setOnClickListener {
+            val intent=Intent("com.workaholiclab.receivertest.MY_BROADCAST")
+            intent.setPackage(packageName)
+            sendOrderedBroadcast(intent,null)
+        }
+```
+
+==**你会发现细小的区别就是**==```sendOrderedBroadcast(intent,null)```
+
+* 第一个参数仍然是Intent
+* 第二个参数是一个与权限有关的字符串
+
+**此时两个name一样的广播都会收到，但他们区别就是一个是标准，一个有序**
+
+
+
+> 如何规定BroadReceiver的先后顺序，当然是在注册文件当中去修改
+
+```xml
+<receiver
+    android:name=".MyBroadcastReceiver"
+    android:enabled="true"
+    android:exported="true">
+    <intent-filter android:priority="100">
+        <action android:name="com.workaholiclab.receivertest.MY_BROADCAST" />
+    </intent-filter>
+</receiver>
+```
+
+> 把priority值设置为100，意味着先接收到,MyBroadcast还能有决定是否再允许广播传递
+
+
+
+```kotlin
+class MyBroadcastReceiver : BroadcastReceiver() {
+
+    override fun onReceive(context: Context, intent: Intent) {
+        // This method is called when the BroadcastReceiver is receiving an Intent broadcast.
+        Toast.makeText(context,"received in MyBroadcastReceiver",Toast.LENGTH_SHORT).show()
+        abortBroadcast()
+    }
+}
+```
+
+```abortBroadcast()```**意味着广播截断**
+
+
+
+
+
+
+
+## 广播功能最佳实践：实现强制下线功能                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+
+> 这个在生活中中的例子很多，像QQ等应用都会有强制下线的功能
+
+
 

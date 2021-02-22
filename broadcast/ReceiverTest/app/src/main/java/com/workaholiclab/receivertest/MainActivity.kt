@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
         bt1.setOnClickListener {
             val intent=Intent("com.workaholiclab.receivertest.MY_BROADCAST")
             intent.setPackage(packageName)
-            sendBroadcast(intent)
+            sendOrderedBroadcast(intent,null)
         }
     }
 
