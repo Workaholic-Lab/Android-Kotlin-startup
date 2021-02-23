@@ -580,7 +580,7 @@ fun getRandomLengthString(str:String)=str*(1..20).random()
 
   > * ->左边是声明该函数接收什么参数的
   >   * 如果不接收任何参数，写一对空括号就好了
-  > * ->的右边用于晟敏返回类型，Unit就相当于Java中的void
+  > * ->的右边用于返回类型，Unit就相当于Java中的void
 
   ```kotlin
   fun num1AndNum2(num1:Int,num2:Int,operation:(Int,Int)->Int):Int{
@@ -690,3 +690,146 @@ inline fun num1AndNum2(num1:Int,num2:Int,operation:(Int,Int)->Int):Int{
 
 ![4](E:\kotlin-study\Studying-Kotlin\Basic Knowledge\4.jpg)
 
+
+
+# 高阶函数的应用
+
+> 为了进行举例说明我们在本节中使用高阶函数简化SharedPrefernces和ContentValues两种API的用法
+
+## 简化SharedPreference
+
+> 原来：
+
+```kotlin
+val editor=getSharedPreferences("data", Context.MODE_PRIVATE).edit()
+editor.putString("name","Wendy")
+editor.putInt("age",20)
+editor.putBoolean("married",false)
+editor.apply()
+```
+
+> 简化：
+
+```kotlin
+private fun SharedPreferences.open(block:SharedPreferences.Editor.()->Unit){
+    val editor=edit()
+    editor.block()
+    editor.apply()
+}
+```
+
+```kotlin
+ getSharedPreferences("data",Context.MODE_PRIVATE).open {
+                putString("name","Wendy")
+                putInt("age",20)
+                putBoolean("married",false)
+            }
+```
+
+
+
+> 实际上，
+
+```xml
+implementation 'androidx.core:core-ktx:1.0.2'
+```
+
+中有一个edit函数就是上面open的用法：
+
+```kotlin
+getSharedPreferences("data",Context.MODE_PRIVATE).edit {
+                putString("name","Wendy")
+                putInt("age",20)
+                putBoolean("married",false)
+            }
+```
+
+
+
+## 简化 ContentValues
+
+> 原来：
+
+```kotlin
+val values=ContentValues().apply {
+                    put("name","Game of Thrones")
+                    put("author","George Martin")
+                    put("pages",720)
+                    put("price",20.85)
+                }
+```
+
+> 简化：
+>
+> * Pair对象
+>   * 就是A to B
+> * vararg对应就是Java的可变参数列表
+>   * 允许传入0,1,2...n个Pair对象
+>   * 这些对象都会赋值到vararg变量当中去，用for-in来遍历即可
+
+
+
+```kotlin
+fun cvOf(vararg pairs: Pair<String,Any?>):ContentValues{
+    
+}
+```
+
+```kotlin
+\fun cvOf(vararg pairs: Pair<String,Any?>):ContentValues{
+    val cv=ContentValues()
+    for(pair in pairs){
+        val key=pair.first
+        val value=pair.second
+        when(value){
+            is Int->cv.put(key,value)
+            is Long->cv.put(key,value)
+            is Short->cv.put(key,value)
+            is Float->cv.put(key,value)
+            is Double->cv.put(key,value)
+            is Boolean->cv.put(key,value)
+            is String->cv.put(key,value)
+            is Byte->cv.put(key,value)
+            is ByteArray->cv.put(key,value)
+            null->cv.putNull(key)
+        }
+    }
+}
+```
+
+> 在改进：用 apply函数
+
+```kotlin
+fun cvOf(vararg pairs: Pair<String,Any?>)=ContentValues().apply{
+    for(pair in pairs){
+        val key=pair.first
+        val value=pair.second
+        when(value){
+            is Int->put(key,value)
+            is Long->put(key,value)
+            is Short->put(key,value)
+            is Float->put(key,value)
+            is Double->put(key,value)
+            is Boolean->put(key,value)
+            is String->put(key,value)
+            is Byte->put(key,value)
+            is ByteArray->put(key,value)
+            null->putNull(key)
+        }
+    }
+}
+```
+
+> 使用：
+
+```kotlin
+val values= cvOf("name" to "Game of Thrones","author" to "George Martin","pages" to 720,"price" to 20.85)
+db.insert("Book",null,values)
+```
+
+* 同样在KTX库中有一个contentValuesOf的函数，用法和上面一样
+
+```kotlin
+val values= contentValuesOf("name" to "Game of Thrones","author" to "George Martin","pages" to 720,"price" to 20.85)
+db.insert("Book",null,values)
+```

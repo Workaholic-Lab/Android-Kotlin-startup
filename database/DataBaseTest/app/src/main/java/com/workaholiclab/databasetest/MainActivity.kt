@@ -4,6 +4,7 @@ import android.content.ContentValues
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.core.content.contentValuesOf
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.IOException
 
@@ -83,12 +84,13 @@ class MainActivity : AppCompatActivity() {
 //                    //手动抛出一个异常让事务失败
 //                    throw NullPointerException()
 //                }
-                val values=ContentValues().apply {
-                    put("name","Game of Thrones")
-                    put("author","George Martin")
-                    put("pages",720)
-                    put("price",20.85)
-                }
+//                val values=ContentValues().apply {
+//                    put("name","Game of Thrones")
+//                    put("author","George Martin")
+//                    put("pages",720)
+//                    put("price",20.85)
+//                }
+                val values= contentValuesOf("name" to "Game of Thrones","author" to "George Martin","pages" to 720,"price" to 20.85)
                 db.insert("Book",null,values)
                 db.setTransactionSuccessful()//事务已经执行成功
             }catch (e:IOException){
