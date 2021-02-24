@@ -39,5 +39,4 @@ class MyDatabaseHelper(val context: Context,name:String,version:Int):SQLiteOpenH
             db?.execSQL("alter table Book add column category_id integer")
         }
     }
-
 }

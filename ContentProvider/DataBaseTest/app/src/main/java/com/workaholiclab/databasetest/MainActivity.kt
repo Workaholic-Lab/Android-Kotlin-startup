@@ -80,10 +80,10 @@ class MainActivity : AppCompatActivity() {
             db.beginTransaction()//开启事务
             try {
                 db.delete("Book",null,null)
-//                if(true){
-//                    //手动抛出一个异常让事务失败
-//                    throw NullPointerException()
-//                }
+                if(true){
+                    //手动抛出一个异常让事务失败
+                    throw NullPointerException()
+                }
 //                val values=ContentValues().apply {
 //                    put("name","Game of Thrones")
 //                    put("author","George Martin")

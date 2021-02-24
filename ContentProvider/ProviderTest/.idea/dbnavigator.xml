@@ -2,7 +2,7 @@
 <project version="4">
   <component name="DBNavigator.Project.DataEditorManager">
     <record-view-column-sorting-type value="BY_INDEX" />
-    <value-preview-text-wrapping value="false" />
+    <value-preview-text-wrapping value="true" />
     <value-preview-pinned value="false" />
   </component>
   <component name="DBNavigator.Project.DataExportManager">
@@ -25,19 +25,19 @@
     <autoscroll-from-editor value="true" />
     <show-object-properties value="true" />
     <loaded-nodes>
-      <connection connection-id="cc2b91fc-13e7-4c39-b4ab-5fb11f861cd0">
-        <schema name="main" object-types="view, table" />
+      <connection connection-id="cd55107e-21c9-4d62-aeea-b4ba4f4510a9">
+        <schema name="main" object-types="constraint, index, dataset trigger, column, view, table" />
       </connection>
-      <connection connection-id="77d7184d-a23d-495a-ac6e-5f688e62e0fc">
+      <connection connection-id="b03b87ff-d2a2-4520-a661-ecaaeb050563">
         <schema name="main" object-types="constraint, index, dataset trigger, column, view, table" />
       </connection>
     </loaded-nodes>
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
-    <connection id="cc2b91fc-13e7-4c39-b4ab-5fb11f861cd0">
+    <connection id="cd55107e-21c9-4d62-aeea-b4ba4f4510a9">
       <console name="Connection" type="STANDARD" schema="main" session="Main" />
     </connection>
-    <connection id="77d7184d-a23d-495a-ac6e-5f688e62e0fc">
+    <connection id="b03b87ff-d2a2-4520-a661-ecaaeb050563">
       <console name="Connection 1" type="STANDARD" schema="main" session="Main" />
     </connection>
   </component>
@@ -45,12 +45,12 @@
     <open-files />
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">
-    <connection id="cc2b91fc-13e7-4c39-b4ab-5fb11f861cd0" />
-    <connection id="77d7184d-a23d-495a-ac6e-5f688e62e0fc" />
+    <connection id="cd55107e-21c9-4d62-aeea-b4ba4f4510a9" />
+    <connection id="b03b87ff-d2a2-4520-a661-ecaaeb050563" />
   </component>
   <component name="DBNavigator.Project.DatasetFilterManager">
-    <filter-actions connection-id="cc2b91fc-13e7-4c39-b4ab-5fb11f861cd0" dataset="main.Book" active-filter-id="EMPTY_FILTER" />
-    <filter-actions connection-id="77d7184d-a23d-495a-ac6e-5f688e62e0fc" dataset="main.Book" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="b03b87ff-d2a2-4520-a661-ecaaeb050563" dataset="main.Book" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="cd55107e-21c9-4d62-aeea-b4ba4f4510a9" dataset="main.Book" active-filter-id="EMPTY_FILTER" />
   </component>
   <component name="DBNavigator.Project.EditorStateManager">
     <last-used-providers />
@@ -78,7 +78,7 @@
   </component>
   <component name="DBNavigator.Project.Settings">
     <connections>
-      <connection id="cc2b91fc-13e7-4c39-b4ab-5fb11f861cd0" active="true">
+      <connection id="cd55107e-21c9-4d62-aeea-b4ba4f4510a9" active="true">
         <database>
           <name value="Connection" />
           <description value="" />
@@ -93,7 +93,7 @@
           <port value="1234" />
           <database value="database" />
           <files>
-            <file path="E:\kotlin-study\Studying-Kotlin\database\DataBaseTest\version_BookStore.db" schema="main" />
+            <file path="C:\Users\Gary\Desktop\BookStore.db" schema="main" />
           </files>
           <type value="NONE" />
           <user value="" />
@@ -165,7 +165,7 @@
           <object-name-filters />
         </object-filters>
       </connection>
-      <connection id="77d7184d-a23d-495a-ac6e-5f688e62e0fc" active="true">
+      <connection id="b03b87ff-d2a2-4520-a661-ecaaeb050563" active="true">
         <database>
           <name value="Connection 1" />
           <description value="" />

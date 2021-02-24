@@ -26,7 +26,7 @@ class DatabaseProvider : ContentProvider() {
 
     //创建
     override fun onCreate()=context?.let {
-        dbHelper=MyDatabaseHelper(it,"BookStore.db",2)
+        dbHelper=MyDatabaseHelper(it,"BookStore.db",3)
         true
     }?:false
 
@@ -114,10 +114,10 @@ class DatabaseProvider : ContentProvider() {
 
 
     override fun getType(uri: Uri)=when(uriMatcher.match(uri)){
-        bookDir->"vnd.android.cursor.dir/vnd.com.workaholiclab.datebasetest.provider.book"
-        bookItem->"vnd.android.cursor.item/vnd.com.workaholiclab.datebasetest.provider.book"
-        categoryDir->"vnd.android.cursor.dir/vnd.com.workaholiclab.datebasetest.provider.category"
-        categoryItem->"vnd.android.cursor.item/vnd.com.workaholiclab.datebasetest.provider.category"
+        bookDir->"vnd.android.cursor.dir/vnd.com.workaholiclab.databasetest.provider.book"
+        bookItem->"vnd.android.cursor.item/vnd.com.workaholiclab.databasetest.provider.book"
+        categoryDir->"vnd.android.cursor.dir/vnd.com.workaholiclab.databasetest.provider.category"
+        categoryItem->"vnd.android.cursor.item/vnd.com.workaholiclab.databasetest.provider.category"
         else->null
     }
 

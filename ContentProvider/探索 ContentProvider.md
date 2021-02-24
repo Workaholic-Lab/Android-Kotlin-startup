@@ -608,13 +608,6 @@ class MyContentProvider: ContentProvider() {
 > **==若讲解得不够细致，也可以看书本p339==**
 
 ```kotlin
-package com.workaholiclab.databasetest
-
-import android.content.ContentProvider
-import android.content.ContentValues
-import android.content.UriMatcher
-import android.database.Cursor
-import android.net.Uri
 
 class DatabaseProvider : ContentProvider() {
     private val bookDir=0
@@ -704,7 +697,7 @@ class DatabaseProvider : ContentProvider() {
 
 
     //删除数据
-    override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?)=dbHelper?.let { 
+    override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?)=dbHelper?.let {
         val db=it.writableDatabase
         val deletedRows=when(uriMatcher.match(uri)){
             bookDir->db.delete("Book",selection,selectionArgs)
@@ -721,17 +714,238 @@ class DatabaseProvider : ContentProvider() {
         }
         deletedRows
     }?:0
-    
-    
+
+
     override fun getType(uri: Uri)=when(uriMatcher.match(uri)){
-        bookDir->"vnd.android.cursor.dir/vnd.com.workaholiclab.datebasetest.provider.book"
-        bookItem->"vnd.android.cursor.item/vnd.com.workaholiclab.datebasetest.provider.book"
-        categoryDir->"vnd.android.cursor.dir/vnd.com.workaholiclab.datebasetest.provider.category"
-        categoryItem->"vnd.android.cursor.item/vnd.com.workaholiclab.datebasetest.provider.category"
+        bookDir->"vnd.android.cursor.dir/vnd.com.workaholiclab.databasetest.provider.book"
+        bookItem->"vnd.android.cursor.item/vnd.com.workaholiclab.databasetest.provider.book"
+        categoryDir->"vnd.android.cursor.dir/vnd.com.workaholiclab.databasetest.provider.category"
+        categoryItem->"vnd.android.cursor.item/vnd.com.workaholiclab.databasetest.provider.category"
         else->null
     }
-
 }
 
 ```
 
+> * 首先，在类开始的时候定义四个变量，分别访问表的所有数据，和表的弹跳数据
+>
+> * 然后在一个by lazy代码块力对UriMatcher进行初始化（by lazy代码块具体解析请见Bisic Knowledge）
+>
+>   * 将匹配的几种URI格式添加进去
+>   * by lazy代码块是Kotlin提供的一种懒加载技术，只有当uriMatcher变量首次被调用的时候才会执行
+>   * 并且代码块最后一行作为返回值赋给uriMatcher
+>
+> * 接下来是抽象方法的实现
+>
+>   * onCreate()利用一些语法糖操作，true表示ContentProvider创建成功，创建MyDatabaseHelper实例
+>
+>   * query()方法 获取SQLiteDatabase实例 ```val db = it.readableDatabase``` ,然后传入Uri参数判断访问哪张表```val cursor=when(uriMatcher.match(uri))```，再用query查询,将Cursor对象返回即可。
+>
+>     * 注意：当访问单条数据的时候，调用uri的getPathSegments()方法，它会将URI权限之后的部分以/符号分隔，并把分割后的结果让如第一个字符串列表中。
+>
+>     * 那么这个列表0位置放的是存放路径，第一个位置存放的是id
+>
+>     * ```kotlin
+>       bookItem->{
+>           val bookId=uri.pathSegments[1]
+>           db.query("Book",projection,"id = ?", arrayOf(bookId),null, null,sortOrder)
+>       }
+>       ```
+>
+>   * insert()方法
+>
+>     * 这个很简单了
+>
+>     * ```kotlin
+>       override fun insert(uri: Uri, values: ContentValues?)=dbHelper?.let {
+>               val db=it.writableDatabase
+>               val uriReturn=when(uriMatcher.match(uri)){
+>                   bookDir,bookItem->{
+>                       val newBookId=db.insert("Book",null,values)
+>                       Uri.parse("content://$authority/book/$newBookId")
+>                   }
+>                   categoryDir,categoryItem->{
+>                       val newCategoryId=db.insert("Category",null,values)
+>                       Uri.parse("content://$authority/category/$newCategoryId")
+>                   }
+>                   else->null
+>               }
+>               uriReturn
+>           }
+>       ```
+>
+>     * 返回一个可以表示这条新增数据的Uri，Uri.parse方法，把URI解析成为Uri对象
+>
+>   * update()方法：
+>
+>     * ```kotlin
+>        override fun update(
+>               uri: Uri, values: ContentValues?, selection: String?,
+>               selectionArgs: Array<String>?
+>           )=dbHelper?.let {
+>               val db = it.writableDatabase
+>               val updatedRows=when(uriMatcher.match(uri)){
+>                   bookDir->db.update("Book",values,selection,selectionArgs)
+>                   bookItem->{
+>                       val bookId=uri.pathSegments[1]
+>                       db.update("Book",values,"id = ?", arrayOf(bookId))
+>                   }
+>                   categoryDir->db.update("Category",values,selection,selectionArgs)
+>                   categoryItem->{
+>                       val categoryId=uri.pathSegments[1]
+>                       db.update("Category",values,"id = ?", arrayOf(categoryId))
+>                   }
+>                   else ->null
+>               }
+>               updatedRows
+>           }?:0
+>       ```
+>
+>     * **受影响的行数作为返回值**
+>
+>   * delete()方法：
+>
+>     * ```kotlin
+>        override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?)=dbHelper?.let {
+>               val db=it.writableDatabase
+>               val deletedRows=when(uriMatcher.match(uri)){
+>                   bookDir->db.delete("Book",selection,selectionArgs)
+>                   bookItem->{
+>                       val bookId=uri.pathSegments[1]
+>                       db.delete("Book","id = ?", arrayOf(bookId))
+>                   }
+>                   categoryDir->db.delete("Category",selection,selectionArgs)
+>                   categoryItem->{
+>                       val categoryId=uri.pathSegments[1]
+>                       db.delete("Category","id = ?", arrayOf(categoryId))
+>                   }
+>                   else -> 0
+>               }
+>               deletedRows
+>           }?:0
+>       ```
+>
+>       * **删除的行数作为返回值**
+>
+>   * getType()方法：
+>
+>     * 和前面介绍的一样，这里不再讲解了
+>
+>     * ```kotlin
+>        override fun getType(uri: Uri)=when(uriMatcher.match(uri)){
+>               bookDir->"vnd.android.cursor.dir/vnd.com.workaholiclab.databasetest.provider.book"
+>               bookItem->"vnd.android.cursor.item/vnd.com.workaholiclab.databasetest.provider.book"
+>               categoryDir->"vnd.android.cursor.dir/vnd.com.workaholiclab.databasetest.provider.category"
+>               categoryItem->"vnd.android.cursor.item/vnd.com.workaholiclab.databasetest.provider.category"
+>               else->null
+>           }
+>       ```
+
+这样子，我们就将ContentProvider中的代码全部编写完了
+
+**可以自己打开注册文件看看变化，这里不再过多阐述**
+
+这里先把我们这个工程项目装到模拟器上面先
+
+> 接下来，我们再写一个新项目ProviderTest来访问上面这个应用程序的数据
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/addData"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add To Book"/>
+    <Button
+        android:id="@+id/queryData"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Query From Book"/>
+    <Button
+        android:id="@+id/updateData"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Update Book"/>
+    <Button
+        android:id="@+id/deleteData"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Delete From Book"/>
+
+
+</LinearLayout>
+```
+
+```kotlin
+package com.workaholiclab.providertest
+
+import android.content.ContentValues
+import android.net.Uri
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import androidx.core.content.contentValuesOf
+import kotlinx.android.synthetic.main.activity_main.*
+
+class MainActivity : AppCompatActivity() {
+    var bookId:String?=null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        addData.setOnClickListener {
+            //添加数据
+            val uri= Uri.parse("content://com.workaholiclab.databasetest.provider/book")
+            val values=contentValuesOf("name" to "A Clash of Kings","author" to " George Martin","pages" to 1040,"price" to 22.85)
+            val newUri=contentResolver.insert(uri,values)//insert方法会返回一个Uri对象，这个对象包含了新增数据的id
+            bookId=newUri?.pathSegments?.get(1)//我们通过getPathSegments方法将这个id取出，稍后会用到
+        }
+        queryData.setOnClickListener {
+            //查询数据
+            val uri = Uri.parse("content://com.workaholiclab.databasetest.provider/book")
+            contentResolver.query(uri,null,null,null,null)?.apply {
+                while(moveToNext()){
+                    val name=getString(getColumnIndex("name"))
+                    val author=getString(getColumnIndex("author"))
+                    val pages=getString(getColumnIndex("pages"))
+                    val price=getString(getColumnIndex("price"))
+                    println("$name $author $pages $price")
+                }
+                close()
+            }
+        }
+
+        updateData.setOnClickListener {
+            //更新数据
+            bookId?.let {
+                val uri=Uri.parse("content://com.workaholiclab.databasetest.provider/book/$it")
+                val values= contentValuesOf("name" to "A storm of Swords","pages" to 1216,"price" to 24.05)
+                contentResolver.update(uri,values,null,null)
+            }
+        }
+
+        deleteData.setOnClickListener {
+            //删除数据
+            bookId?.let {
+                val uri= Uri.parse("content://com.workaholiclab.databasetest.provider/book/$it")
+                contentResolver.delete(uri,null,null)
+            }
+        }
+    }
+}
+```
+
+
+
+> 我承认，这些代码确实存在一些问题，需要大家自行做出修订，锻炼一下大家的Debug能力吧
+
+
+
+> ContentProvider完更
