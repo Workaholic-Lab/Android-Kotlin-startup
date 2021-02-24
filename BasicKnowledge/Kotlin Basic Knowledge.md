@@ -833,3 +833,72 @@ db.insert("Book",null,values)
 val values= contentValuesOf("name" to "Game of Thrones","author" to "George Martin","pages" to 720,"price" to 20.85)
 db.insert("Book",null,values)
 ```
+
+
+
+# 泛型
+
+> Kotlin的泛型和Java确实有类似的地方，也存在不一样的地方，我们看看基本用法：
+
+> 泛型主要由两种定义
+>
+> * 定义泛型类
+> * 定义泛型方法
+
+定义一个泛型类 和创建对象实例
+
+```kotlin
+class MyClass<T> {
+    fun method(param:T):T{
+        return param
+    }
+}
+val myClass=MyClass<Int>()
+val result= myClass.method(123)
+```
+
+定义泛型方法
+
+```kotlin
+class MyClass {
+    fun<T> method(param:T):T{
+        return param
+    }
+}
+
+val myClass=MyClass()
+val result= myClass.method<Int>(123)
+```
+
+> 除此之外，Kotlin还允许我们对翻新的类型进行限制，可以指定上界类型，ex:Number
+>
+> 默认上界类型为Any?
+
+```kotlin
+class MyClass {
+    fun<T:Number> method(param:T):T{
+        return param
+    }
+}
+
+val myClass=MyClass()
+val result= myClass.method<Int>(123)
+```
+
+
+
+**==其他的泛型例子详见书本p346页==**
+
+
+
+> 可以看出来Kotlin的泛型和Java的很类似，没什么大的区别，很好理解。
+
+
+
+# 类的委托和委托属性
+
+> 委托是一种设计模式，它的理念是：操作对象自己不会去处理某段逻辑，而是会把工作委托给另外一个辅助对象去处理，像C#这种语言就对委托进行了原生的支持
+
+# 实现自己的lazy函数
+
+> 由于时间原因，**这两部分的内容详解还是==见课本p347页吧==**
