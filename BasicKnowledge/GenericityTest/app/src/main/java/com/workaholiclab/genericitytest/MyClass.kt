@@ -1,5 +1,11 @@
 package com.workaholiclab.genericitytest
 
+import android.content.Context
+import android.graphics.BitmapFactory
+import androidx.core.app.NotificationCompat
+
+val channelId: String?=null
+val context:Context?=null
 /**
  * @Description:
  * @author: Gary
@@ -7,11 +13,7 @@ package com.workaholiclab.genericitytest
  * @since: Kotlin 1.4
  * @modified by:
  */
-class MyClass {
-    fun<T:Number> method(param:T):T{
-        return param
-    }
-}
-
-val myClass=MyClass()
-val result= myClass.method<Int>(123)
+val notification=NotificationCompat.Builder(context,channelId).setContentTitle("This is content title")
+    .setContentText("This is content text").setSmallIcon(R.drawable.ic_launcher_background)
+    .setLargeIcon(BitmapFactory.decodeResource(getResources(),R.drawable.ic_launcher_background))
+    .build()
