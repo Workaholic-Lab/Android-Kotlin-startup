@@ -902,3 +902,44 @@ val result= myClass.method<Int>(123)
 # 实现自己的lazy函数
 
 > 由于时间原因，**这两部分的内容详解还是==见课本p347页吧==**
+
+# infix函数构建更可读的语法
+
+
+
+> 首先，正如我们前面接触到的 to 是Kotlin的一个关键字（A to B），因为Kotlin提供了一种高级语法糖特性：infix函数
+>
+> infix函数不难理解，他只是将 A.to(B)的编程语言语法规则调整了一下
+
+下面我们看一些例子就懂了：
+
+> 原来写法：
+
+```kotlin
+if("Hello".startsWith("Hel")){
+    //这里if条件肯定为true
+}
+```
+
+> 借助infix函数
+
+```kotlin
+infix fun String.beginsWith(prefix:String) =startsWith(prefix)
+```
+
+```kotlin
+if("Hello" beginsWith "Hel"){
+    //这里if条件肯定为true
+}
+```
+
+> 除此之外
+
+```kotlin
+infix fun <T> Collection<T>.has(element:T)=contains(element)
+
+//调用：
+if(list has "Banana")
+```
+
+> 有兴趣可以去阅读一下to函数的源码，**==详解请见课本p383页==**
