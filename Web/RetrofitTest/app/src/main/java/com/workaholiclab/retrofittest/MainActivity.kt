@@ -16,8 +16,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         getAppData.setOnClickListener {
-            val retrofit = Retrofit.Builder().baseUrl("http://10.0.2.2/").addConverterFactory(GsonConverterFactory.create()).build()
-            val appService = retrofit.create(AppService::class.java)
+
+            //val retrofit = Retrofit.Builder().baseUrl("http://10.0.2.2/").addConverterFactory(GsonConverterFactory.create()).build()
+            val appService = ServiceCreator.create(AppService::class.java)
             appService.getAppData().enqueue(object : Callback<List<App>>{
                 override fun onFailure(call: Call<List<App>>, t: Throwable) {
                     t.printStackTrace()
