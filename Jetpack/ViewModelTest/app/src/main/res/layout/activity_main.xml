@@ -21,12 +21,46 @@
         android:layout_gravity="center_horizontal"
         android:text="Plus One"/>
 
+
     <Button
         android:id="@+id/clearBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:text="Clear"/>
+
+    <Button
+        android:id="@+id/getUserBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="get User"
+        android:layout_gravity="center_horizontal"/>
+
+    <Button
+        android:id="@+id/addDataBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add Data"
+        android:layout_gravity="center_horizontal"/>
+    <Button
+        android:id="@+id/updateDataBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Update Data"
+        android:layout_gravity="center_horizontal"/>
+    <Button
+        android:id="@+id/deleteDataBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Delete Data"
+        android:layout_gravity="center_horizontal"/>
+
+    <Button
+        android:id="@+id/queryDataBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Query Data"
+        android:layout_gravity="center_horizontal"/>
 
 
 </LinearLayout>
