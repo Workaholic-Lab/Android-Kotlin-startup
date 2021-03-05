@@ -10,7 +10,12 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
+import androidx.work.BackoffPolicy
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
 
@@ -66,6 +71,36 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+        //WorkManager
+        doWorkBtn.setOnClickListener {
+            val request = OneTimeWorkRequest.Builder(SimpleWorker::class.java).build()
+            WorkManager.getInstance(this).enqueue(request)
+        }
+        //WorkManager处理复杂任务
+        val request = OneTimeWorkRequest.Builder(SimpleWorker::class.java).setInitialDelay(5,TimeUnit.MINUTES).addTag("simple").build()
+        WorkManager.getInstance(this).cancelAllWorkByTag("simple")
+        WorkManager.getInstance(this).cancelWorkById(request.id)
+        WorkManager.getInstance(this).cancelAllWork()
+        val request1 = OneTimeWorkRequest.Builder(SimpleWorker::class.java).setInitialDelay(5,TimeUnit.MINUTES).setBackoffCriteria(BackoffPolicy.LINEAR,10,TimeUnit.MINUTES).build()
+
+        //监听数据
+        WorkManager.getInstance(this).getWorkInfoByIdLiveData(request.id).observe(this, Observer {workInfo->
+            if(workInfo.state==WorkInfo.State.SUCCEEDED){
+                Log.d("MainActivity","do work succeeded")
+            }else if(workInfo.state==WorkInfo.State.FAILED){
+                Log.d("MainActivity","do work failed")
+            }
+        })
+
+        //链式任务
+//        val sync = ...
+//        val compress = ...
+//        val upload = ...
+//        WorkManager.getInstance(this).beginWith(sync).then(compress).then(upload).enqueue()
+
+
+
     }
 
     override fun onPause() {

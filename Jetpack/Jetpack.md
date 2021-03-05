@@ -998,9 +998,169 @@ abstract class AppDatabase:RoomDatabase(){
 
 ### 基本用法
 
+> 首先导入依赖文件
+
+```xml
+implementation 'androidx.work:work-runtime:2.2.0'
+```
+
+> 导入依赖过后，其实WorkManager非常简单，一共分为三步
+
+1. 定义一个后台任务，并且实现具体逻辑
+2. 配置该后台任务的运行条件和约束信息，并构建后台任务请求
+3. 将该后台任务请求传入WorkManager的enqueue()方法中，系统会在合适的时间运行
+
+> 下面我们根据上面的步骤一步一步的来实现：
+
+1. 
+
+```kotlin
+class SimpleWorker(context: Context,params:WorkerParameters):Worker(context,params) {
+    override fun doWork(): Result {
+        Log.d("SimpleWorker","do work in SimpleWorker")
+        return Result.success()
+    }
+}
+```
+
+> 第一步后台任务的写法是非常固定的，也非常好理解。首先每一个后台任务都必须继承自Worker类，并且调用它唯一的构造函数。然后重写父类的doWork()方法，这个方法中编写具体的后台任务逻辑即可
+
+> 需要注意的是：doWork()方法不会运行在主线程当中，**因此可以放心地在这里执行耗时逻辑**，不过这里简单起见知识打印了一行日志
+>
+> * doWork方法返回值返回任务结束还是失败结果，还有一个Result.retry(),其实也是代表失败，知识可以结合WorkRequest.Builder的setBackoffCriteria()方法来重新执行任务
+
+> 就是那么简单，下面来看一下第二步：
+
+2. 其实这一步是最复杂的，因为可以配置的内容非常得多，不过目前我们还只是学习WorkManager的基本用法，因此只进行最基本的配置就可以了。
+
+* OneTimeWorkRequest.Builder是WorkRequest.Build的子类，用于构建单次运行的后台任务请求
+
+```kotlin
+val request = OneTimeWorkRequest.Builder(SimpleWorker::class.java).build()
+```
+
+* WorkRequest.Build还有另外一个子类，用于构建周期性运行的后台请求
+
+```kotlin
+val request1 = PeriodicWorkRequest.Builder(SimpleWorker::class.java,15,TimeUnit.MINUTES).build()
+```
+
+> 也很容易看懂，就不再解释了
+
+3. 最后一步，将构建出的后台任务请求传入WorkManager的enqueue()方法中，系统会在合适的时间来运行
+
+```kotlin
+WorkManager.getInstance(context).enqueue(request)
+```
+
+> 下面我们通过具体例子来看看，继续修改我们之前的项目：
+
+* activity_main.xml增多一个Button
+
+```xml
+<Button
+    android:id="@+id/doWorkBtn"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="Do Work"
+    android:layout_gravity="center_horizontal"/>
+```
 
 
-### 处理复杂事务
+
+* MainActivity增多监听事件
+
+```kotlin
+doWorkBtn.setOnClickListener { 
+    val request = OneTimeWorkRequest.Builder(SimpleWorker::class.java).build()
+    WorkManager.getInstance(this).enqueue(request)
+}
+```
 
 
+
+### 处理复杂任务
+
+> 除了控制时间之外，实际上WorkMange还允许我们控制其他许多方面的东西
+
+* 让后台任务延迟进行
+
+```kotlin
+val request = OneTimeWorkRequest.Builder(SimpleWorker::class.java).setInitialDelay(5,TimeUnit.MINUTES).build()
+```
+
+* 给后台任务添加一个标签
+
+```kotlin
+val request = OneTimeWorkRequest.Builder(SimpleWorker::class.java).setInitialDelay(5,TimeUnit.MINUTES).addTag("simple").build()
+```
+
+> 这样子我们可以通过标签来取消后台任务请求：
+
+```kotlin
+WorkManager.getInstance(this).cancelAllWorkByTag("simple")
+```
+
+> 当然没有标签也可以使用id
+>
+> * 但这只能取消一个后台任务请求
+
+```kotlin
+WorkManager.getInstance(this).cancelWorkById(request.id)
+```
+
+> 取消所有后台任务请求
+
+```kotlin
+WorkManager.getInstance(this).cancelAllWork()
+```
+
+* 后台doWork()方法返回Result.retey()，可以用下面方法重新执行任务
+
+```kotlin
+val request1 = OneTimeWorkRequest.Builder(SimpleWorker::class.java).setInitialDelay(5,TimeUnit.MINUTES)val request1 = OneTimeWorkRequest.Builder(SimpleWorker::class.java).setInitialDelay(5,TimeUnit.MINUTES).setBackoffCriteria(BackoffPolicy.LINEAR,10,TimeUnit.MINUTES).build().build()
+```
+
+> 核心：```setBackoffCriteria(BackoffPolicy.LINEAR,10,TimeUnit.MINUTES)```
+>
+> * p1：用于指定如果任务失败再次致信失败，下次重试的时间应该以什么样的延迟方式
+
+
+
+* 之前doWork()方法返回的success()和failure()，实际上就是用于通知任务运行结果的，我们用下面的代码来进行**监听**
+
+```kotlin
+WorkManager.getInstance(this).getWorkInfoByIdLiveData(request.id).observe(this, Observer {workInfo->
+    if(workInfo.state==WorkInfo.State.SUCCEEDED){
+        Log.d("MainActivity","do work succeeded")
+    }else if(workInfo.state==WorkInfo.State.FAILED){
+        Log.d("MainActivity","do work failed")
+    }
+})
+```
+
+> 另外你还可以用getWorkInfosByTagLiveData()方法，监听同一个标签名下所以后台任务请求的运行结果，用法类似，这里不再阐述了
+
+* 链式任务
+
+> 知识WorkManager比较有特色的的地方
+
+> 假设下面定义了先同步，在压缩，最后上传，这里可以通过链式任务实现，代码如下：
+
+```kotlin
+val sync = ...
+val compress = ...
+val upload = ...
+WorkManager.getInstance(this).beginWith(sync).then(compress).then(upload).enqueue()
+```
+
+
+
+
+
+> Jetpack还有很多其他深入的内容，这部分可以去看guolin大神的博客或者关注他的公众号
+
+
+
+> Jetpack博客完更
 
