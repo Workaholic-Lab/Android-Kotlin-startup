@@ -379,7 +379,7 @@ class MainViewModel(countReserved:Int):ViewModel() {
 }
 ```
 
-> var counter = MutableLiveData<Int>() 它的用法诶厂检单，主要是getValue，setValue，postValue
+> var counter = MutableLiveData<Int>() 它的用法简单，主要是getValue，setValue，postValue
 >
 > 分别为获取LiveData数据；设置LiveData数据但是只能在主线程中调用；postValue用于在非主线程中给LiveData设置数据。
 >
