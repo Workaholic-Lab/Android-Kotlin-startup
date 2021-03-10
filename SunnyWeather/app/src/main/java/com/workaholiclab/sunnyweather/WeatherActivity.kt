@@ -2,6 +2,7 @@ package com.workaholiclab.sunnyweather
 
 import android.content.Context
 import android.graphics.Color
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -29,23 +30,27 @@ class WeatherActivity : AppCompatActivity() {
     val viewModel by lazy { ViewModelProviders.of(this).get(WeatherViewModel::class.java) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //拿到当前的DecorView
-        val decorView = window.decorView
-        //改变UI显示
-        decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-       //状态栏设置成为透明色
-        window.statusBarColor = Color.TRANSPARENT
-
+        if(Build.VERSION.SDK_INT>=21) {
+            //拿到当前的DecorView
+            val decorView = window.decorView
+            //改变UI显示
+            decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            //状态栏设置成为透明色
+            window.statusBarColor = Color.TRANSPARENT
+        }
         setContentView(R.layout.activity_weather)
+
         if(viewModel.locationLng.isEmpty()){
             viewModel.locationLng = intent.getStringExtra("location_lng")?:""
         }
         if(viewModel.locationLat.isEmpty()){
             viewModel.locationLat = intent.getStringExtra("location_lat")?:""
         }
-        if(viewModel.placeName.isEmpty()){
+        if(viewModel.placeName.isEmpty())
+        {
             viewModel.placeName = intent.getStringExtra("place_name")?:""
         }
+
         viewModel.weatherLiveData.observe(this, Observer { result->
             val weather = result.getOrNull()
             if(weather!=null){
@@ -61,8 +66,8 @@ class WeatherActivity : AppCompatActivity() {
         refreshWeather()
         swipeRefresh.setOnRefreshListener {
             refreshWeather()
-
         }
+
         viewModel.refreshWeather(viewModel.locationLng,viewModel.locationLat)
 
         //左侧导航栏
@@ -104,7 +109,7 @@ class WeatherActivity : AppCompatActivity() {
         val currentTempText = "${realtime.temperature.toInt()} ℃"
         currentTmp.text = currentTempText
         currentSky.text = getSky(realtime.skycon).info
-        val currentPM25Text = "空气指数 ${realtime.airQuality.api.chn.toInt()}"
+        val currentPM25Text = "空气指数 ${realtime.airQuality.aqi.chn.toInt()}"
         currentAQI.text = currentPM25Text
         nowLayout.setBackgroundResource(getSky(realtime.skycon).bg)
         //填充forecast.xml布局数据
@@ -114,11 +119,11 @@ class WeatherActivity : AppCompatActivity() {
             val skycon = daily.skycon[i]
             val temperature = daily.temperature[i]
             val view = LayoutInflater.from(this).inflate(R.layout.forecast_item,forecastLayout,false)
-            val dayInfo = view.findViewById(R.id.dateInfo) as TextView
+            val dateInfo = view.findViewById(R.id.dateInfo) as TextView
             val skyIcon = view.findViewById(R.id.skyIcon) as ImageView
             val skyInfo = view.findViewById(R.id.skyInfo) as TextView
             val temperatureInfo = view.findViewById(R.id.temperatureInfo) as TextView
-            val simpleDateFormat =  SimpleDateFormat("yyy-MM-dd",Locale.getDefault())
+            val simpleDateFormat =  SimpleDateFormat("yyyy-MM-dd",Locale.getDefault())
             dateInfo.text = simpleDateFormat.format(skycon.date)
             val sky = getSky(skycon.value)
             skyIcon.setImageResource(sky.icon)

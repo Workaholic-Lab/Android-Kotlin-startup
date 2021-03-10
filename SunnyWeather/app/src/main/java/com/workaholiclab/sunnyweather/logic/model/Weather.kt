@@ -8,5 +8,4 @@ package com.workaholiclab.sunnyweather.logic.model
  * @since: Kotlin 1.4
  * @modified by:
  */
-data class Weather(val realtime: RealtimeResponse.Realtime,val daily: DailyResponse.Daily) {
-}
+class Weather(val realtime: RealtimeResponse.Realtime,val daily: DailyResponse.Daily)

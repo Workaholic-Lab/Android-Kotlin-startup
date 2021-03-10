@@ -33,7 +33,7 @@ object SunnyWeatherNetwork {
     suspend fun searchPlaces(query:String) = placeService.searchPlaces(query).await()//searchPlaces返回Call<PlaceResponse>
 
     //挂起函数
-     suspend fun <T> Call<T>.await(): T {
+     private suspend fun <T> Call<T>.await(): T {
         //当前协程挂起，普通线程执行Lambda表达式
         return suspendCoroutine { continuation ->
             enqueue(object : Callback<T> {

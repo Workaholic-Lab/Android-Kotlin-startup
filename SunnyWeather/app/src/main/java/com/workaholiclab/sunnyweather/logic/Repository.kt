@@ -44,7 +44,7 @@ object Repository {
 
 
     //更新天气情况
-    fun refreshWeather(lng:String,lat:String)= fire(Dispatchers.IO) {
+    fun refreshWeather(lng:String,lat:String,placeName: String)= fire(Dispatchers.IO) {
 
             coroutineScope {
                 //async中发起网络请求，协程中才能调用，所以要在coroutineScope进行
